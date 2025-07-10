@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Language attribute will be updated by JS -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-translate-key="Voice_Data_Entry">
+      Advanced Customer Data Entry w/ Admin
+    </title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://cdn.glitch.global/8769f4df-5480-4ce0-bdf3-d0e696305fae/download.png?v=1745993160780"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css" />
+    <!-- Flatpickr date-picker CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+    />
+    <!-- Toastify JS CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+  </head>
+  <body class="light-theme">
+    <!-- Default theme -->
+
+    <!-- SECTION START: Loading Indicator -->
+    <div id="loadingIndicator" class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+    <!-- SECTION END: Loading Indicator -->
+
+    <!-- SECTION START: Main Container -->
+    <div class="container fade-in">
+      <!-- SECTION START: Header Area -->
+      <div class="header-controls">
+        <h1 data-translate-key="mainHeading" class="glowing-text">
+          Mswasth Entry Portal
+        </h1>
+        <div class="top-right-controls">
+          <div class="controls language-selector">
+            <label
+              for="languageSwitcher"
+              class="sr-only"
+              data-translate-key="lblLanguage"
+              >Language:</label
+            >
+            <i class="fas fa-globe"></i>
+            <select id="languageSwitcher" title="Select UI Language">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+            </select>
+          </div>
+          <div class="controls speech-language-selector">
+            <label
+              for="speechLangSelect"
+              class="sr-only"
+              data-translate-key="titleSpeechLangSelect"
+              >Speech Language:</label
+            >
+            <i class="fas fa-language"></i>
+            <select
+              id="speechLangSelect"
+              data-translate-key="titleSpeechLangSelect"
+              title="Select Speech Language"
+            >
+              <option value="en-US">English (US)</option>
+              <option value="en-IN">English (India)</option>
+              <option value="hi-IN">Hindi (India)</option>
+              <option value="bn-IN">Bengali (India)</option>
+              <option value="ta-IN">Tamil (India)</option>
+              <option value="te-IN">Telugu (India)</option>
+              <option value="kn-IN">Kannada (India)</option>
+            </select>
+          </div>
+
+          <!-- Voice / Form Controls -->
+          <button
+            id="recordAllButton"
+            class="control-button"
+            data-translate-key="btnRecordAll"
+            title="Record All Fields Sequentially"
+          >
+            <i class="fas fa-microphone-lines"></i>
+            <span data-translate-key="lblRecordAll">Record All</span>
+          </button>
+          <button
+            id="cleanAllFormButton"
+            class="control-button"
+            data-translate-key="btnCleanAllForm"
+            title="Clean All Fields"
+          >
+            <i class="fas fa-broom"></i>
+            <span data-translate-key="lblCleanAll">Clean All</span>
+          </button>
+          <button
+            id="toggleDataEntryModeButton"
+            class="control-button"
+            data-translate-key="btnEnterDataEntryMode"
+            title="Toggle Data Entry View"
+          >
+            <i class="fas fa-columns"></i>
+            <span data-translate-key="lblEnterDataEntryMode">Focus Mode</span>
+          </button>
+          <button
+            id="themeToggleButton"
+            class="control-button"
+            title="Toggle Theme"
+          >
+            <i class="fas fa-sun"></i>
+            <span class="theme-icon-text" data-translate-key="btnThemeLight"
+              >Light</span
+            >
+          </button>
+
+          <!-- Dashboard/Admin/Reset -->
+          <button
+            id="dashboardButton"
+            class="control-button"
+            data-translate-key="btnDashboard"
+            title="Show Dashboard"
+          >
+            <i class="fas fa-chart-pie"></i>
+            <span data-translate-key="btnDashboard">Dashboard</span>
+          </button>
+          <button
+            id="adminButton"
+            class="control-button"
+            data-translate-key="btnAdminLogin"
+            title="Admin Panel"
+          >
+            <i class="fas fa-user-shield"></i>
+            <span data-translate-key="btnAdminLogin">Admin</span>
+          </button>
+          <button
+            id="resetApplicationDataButton"
+            class="control-button"
+            data-translate-key="btnResetAppData"
+            title="Reset all application data (entries and partner configurations) and reload."
+          >
+            <i class="fas fa-sync-alt"></i>
+            <span data-translate-key="lblResetAppData">Reset App Data</span>
+          </button>
+        </div>
+      </div>
+      <!-- SECTION END: Header Area -->
+
+      <p id="status" class="status-message sr-only">
+        Status messages will appear as toasts.
+      </p>
+
+      <!-- SECTION START: Main Content Area (Form + Image Viewer) -->
+      <div class="main-content-area">
+        <!-- SECTION START: Main Entry Form -->
+        <form id="customerForm" class="entry-form" novalidate>
+          <input type="hidden" id="editingId" value="" />
+
+          <div class="form-grid">
+            <!-- Form Column 1 -->
+            <div class="form-column">
+              <div class="form-field">
+                <label
+                  for="partnerNameSelect"
+                  data-translate-key="lblPartnerName"
+                  >Partner Name:<span class="required-star">*</span></label
+                >
+                <select id="partnerNameSelect" required>
+                  <option
+                    value=""
+                    data-translate-key="optSelectPartner"
+                  >
+                    -- Select Partner --
+                  </option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label
+                  for="productSelect"
+                  data-translate-key="lblProductDetails"
+                  >Product Details:<span class="required-star">*</span></label
+                >
+                <select id="productSelect" required disabled>
+                  <option
+                    value=""
+                    data-translate-key="optSelectPartnerFirst"
+                  >
+                    -- Select Partner First --
+                  </option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="premiumSelect" data-translate-key="lblPremium"
+                  >Premium:<span class="required-star">*</span></label
+                >
+                <select id="premiumSelect" required disabled>
+                  <option
+                    value=""
+                    data-translate-key="optSelectProductFirst"
+                  >
+                    -- Select Product First --
+                  </option>
+                </select>
+              </div>
+
+              <!-- Branch Name -->
+              <div class="form-field">
+                <label
+                  for="branchName"
+                  data-translate-key="lblBranchName"
+                  >Branch Name:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="branchName"
+                    data-translate-key="phBranchName"
+                    placeholder="Enter Branch Name"
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="branchName"
+                    data-translate-key="titleMicButton"
+                    title="Record Branch Name"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="branchName"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Region -->
+              <div class="form-field">
+                <label for="region" data-translate-key="lblRegion"
+                  >Region:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="region"
+                    placeholder="Enter Region"
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="region"
+                    data-translate-key="titleMicButton"
+                    title="Record Region"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="region"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Customer Name -->
+              <div class="form-field">
+                <label
+                  for="customerName"
+                  data-translate-key="lblCustomerName"
+                  >Customer Name:<span class="required-star">*</span></label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="customerName"
+                    data-translate-key="phCustomerName"
+                    placeholder="Enter Customer Name"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="customerName"
+                    data-translate-key="titleMicButton"
+                    title="Record Customer Name"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="customerName"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Gender -->
+              <div class="form-field">
+                <label data-translate-key="lblGender">Gender:</label>
+                <div class="gender-group">
+                  <label
+                    ><input
+                      type="radio"
+                      name="gender"
+                      value="Male"
+                      id="genderMale"
+                    /><span data-translate-key="optGenderMale"
+                      >Male</span
+                    ></label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="gender"
+                      value="Female"
+                      id="genderFemale"
+                    /><span data-translate-key="optGenderFemale"
+                      >Female</span
+                    ></label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="gender"
+                      value="Other"
+                      id="genderOther"
+                    /><span data-translate-key="optGenderOther"
+                      >Other</span
+                    ></label
+                  >
+                </div>
+              </div>
+
+              <!-- Date of Birth -->
+              <div class="form-field">
+                <label for="dob" data-translate-key="lblDob"
+                  >Date of Birth:<span class="required-star">*</span></label
+                >
+                <input
+                  type="text"
+                  id="dob"
+                  class="datepicker"
+                  placeholder="dd-mm-yyyy"
+                  required
+                />
+              </div>
+            </div>
+            <!-- END Form Column 1 -->
+
+            <!-- Form Column 2 -->
+            <div class="form-column">
+              <div class="form-field">
+                <label for="selectedTenure" data-translate-key="lblTenure"
+                  >Tenure:</label
+                >
+                <input
+                  type="text"
+                  id="selectedTenure"
+                  readonly
+                  disabled
+                  placeholder="Auto-selected"
+                />
+              </div>
+              <div class="form-field">
+                <label for="selectedCseName" data-translate-key="lblCseName"
+                  >CSE Name:</label
+                >
+                <input
+                  type="text"
+                  id="selectedCseName"
+                  readonly
+                  disabled
+                  placeholder="Auto-selected"
+                />
+              </div>
+
+              <!-- Customer ID -->
+              <div class="form-field">
+                <label for="customerID" data-translate-key="lblCustomerID"
+                  >Customer ID:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="customerID"
+                    data-translate-key="phCustomerID"
+                    placeholder="Enter Customer ID"
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="customerID"
+                    data-translate-key="titleMicButton"
+                    title="Record Customer ID"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="customerID"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Mobile Number -->
+              <div class="form-field">
+                <label for="mobileNumber" data-translate-key="lblMobileNumber"
+                  >Mobile Number:<span class="required-star">*</span></label
+                >
+                <div class="input-group">
+                  <input
+                    type="tel"
+                    id="mobileNumber"
+                    placeholder="Enter Mobile (10–12 digits)"
+                    pattern="\d{10,12}"
+                    minlength="10"
+                    maxlength="12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="mobileNumber"
+                    data-translate-key="titleMicButton"
+                    title="Record Mobile Number"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="mobileNumber"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Enrolment Date -->
+              <div class="form-field">
+                <label for="enrolmentDate" data-translate-key="lblEnrolmentDate"
+                  >Enrolment Date:</label
+                >
+                <input
+                  type="text"
+                  id="enrolmentDate"
+                  class="datepicker"
+                  placeholder="dd-mm-yyyy"
+                />
+              </div>
+
+              <!-- Savings Account -->
+              <div class="form-field">
+                <label for="savingsAccountNumber" data-translate-key="lblSavingsAccNum"
+                  >Savings A/C No.:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="savingsAccountNumber"
+                    data-translate-key="phSavingsAccNum"
+                    placeholder="Enter Savings Account Number"
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="savingsAccountNumber"
+                    data-translate-key="titleMicButton"
+                    title="Record Savings Account No"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="savingsAccountNumber"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- CSB Code -->
+              <div class="form-field">
+                <label for="csbCode" data-translate-key="lblCsbCode"
+                  >CSB Code:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="csbCode"
+                    data-translate-key="phCsbCode"
+                    placeholder="Enter CSB Code"
+                  />
+                  <button
+                    type="button"
+                    class="mic-button"
+                    data-target="csbCode"
+                    data-translate-key="titleMicButton"
+                    title="Record CSB Code"
+                  >
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="clean-button"
+                    data-target="csbCode"
+                    data-translate-key="titleCleanButton"
+                    title="Clean Input"
+                  >
+                    <i class="fas fa-broom"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- D2C / RO Code -->
+              <div class="form-field">
+                <label for="d2cRoCode" data-translate-key="lblD2CRoCode"
+                  >D2C Code / RO Code:</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="d2cRoCode"
+                    data-translate-key="phD2CRoCode"
+                    placeholder="Enter D2C/RO Code"
+                  />
+                </div>
+              </div>
+            </div>
+            <!-- END Form Column 2 -->
+
+          </div><!-- end form-grid -->
+
+          <!-- Nominee Details -->
+          <div class="nominee-section">
+            <hr class="separator" />
+            <h3 data-translate-key="nomineeSectionTitle">Nominee Details</h3>
+            <div class="form-grid nominee-grid">
+              <!-- Nominee Column 1 -->
+              <div class="form-column">
+                <div class="form-field">
+                  <label for="nomineeName" data-translate-key="lblNomineeName"
+                    >Nominee Name:</label
+                  >
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      id="nomineeName"
+                      data-translate-key="phNomineeName"
+                      placeholder="Enter Nominee Name"
+                    />
+                    <button
+                      type="button"
+                      class="mic-button"
+                      data-target="nomineeName"
+                      data-translate-key="titleMicButton"
+                      title="Record Nominee Name"
+                    >
+                      <i class="fas fa-microphone"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="clean-button"
+                      data-target="nomineeName"
+                      data-translate-key="titleCleanButton"
+                      title="Clean Input"
+                    >
+                      <i class="fas fa-broom"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="nomineeDob" data-translate-key="lblNomineeDob"
+                    >Nominee Date of Birth:</label
+                  >
+                  <input
+                    type="text"
+                    id="nomineeDob"
+                    class="datepicker"
+                    placeholder="dd-mm-yyyy"
+                  />
+                </div>
+                <div class="form-field">
+                  <label for="nomineeRelationship" data-translate-key="lblNomineeRelationship"
+                    >Nominee Relationship:</label
+                  >
+                  <select id="nomineeRelationship">
+                    <option
+                      value=""
+                      data-translate-key="optSelectRelationship"
+                    >
+                      -- Select Relationship --
+                    </option>
+                    <option value="Spouse" data-translate-key="optRelSpouse">
+                      Spouse
+                    </option>
+                    <option value="Son" data-translate-key="optRelSon">
+                      Son
+                    </option>
+                    <option
+                      value="Daughter"
+                      data-translate-key="optRelDaughter"
+                    >
+                      Daughter
+                    </option>
+                    <option value="Mother" data-translate-key="optRelMother">
+                      Mother
+                    </option>
+                    <option value="Father" data-translate-key="optRelFather">
+                      Father
+                    </option>
+                    <option value="Sister" data-translate-key="optRelSister">
+                      Sister
+                    </option>
+                    <option
+                      value="Brother"
+                      data-translate-key="optRelBrother"
+                    >
+                      Brother
+                    </option>
+                    <option
+                      value="Grandfather"
+                      data-translate-key="optRelGrandfather"
+                    >
+                      Grandfather
+                    </option>
+                    <option
+                      value="Grandmother"
+                      data-translate-key="optRelGrandmother"
+                    >
+                      Grandmother
+                    </option>
+                    <option value="Nephew" data-translate-key="optRelNephew">
+                      Nephew
+                    </option>
+                    <option value="Niece" data-translate-key="optRelNiece">
+                      Niece
+                    </option>
+                    <option value="Uncle" data-translate-key="optRelUncle">
+                      Uncle
+                    </option>
+                    <option value="Aunty" data-translate-key="optRelAunty">
+                      Aunty
+                    </option>
+                    <option value="Other" data-translate-key="optRelOther">
+                      Other
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <!-- Nominee Column 2 -->
+              <div class="form-column">
+                <div class="form-field">
+                  <label for="nomineeMobileNumber" data-translate-key="lblNomineeMobile"
+                    >Nominee Mobile Number:</label
+                  >
+                  <div class="input-group">
+                    <input
+                      type="tel"
+                      id="nomineeMobileNumber"
+                      data-translate-key="phNomineeMobile"
+                      placeholder="Enter 10-digit mobile number"
+                      pattern="\d{10}"
+                      title="Enter a 10-digit mobile number"
+                    />
+                    <button
+                      type="button"
+                      class="mic-button"
+                      data-target="nomineeMobileNumber"
+                      data-translate-key="titleMicButton"
+                      title="Record Nominee Mobile"
+                    >
+                      <i class="fas fa-microphone"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="clean-button"
+                      data-target="nomineeMobileNumber"
+                      data-translate-key="titleCleanButton"
+                      title="Clean Input"
+                    >
+                      <i class="fas fa-broom"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label data-translate-key="lblNomineeGender"
+                    >Nominee Gender:</label
+                  >
+                  <div class="gender-group">
+                    <label
+                      ><input
+                        type="radio"
+                        name="nomineeGender"
+                        value="Male"
+                        id="nomineeGenderMale"
+                      /><span data-translate-key="optGenderMale"
+                        >Male</span
+                      ></label
+                    >
+                    <label
+                      ><input
+                        type="radio"
+                        name="nomineeGender"
+                        value="Female"
+                        id="nomineeGenderFemale"
+                      /><span data-translate-key="optGenderFemale"
+                        >Female</span
+                      ></label
+                    >
+                    <label
+                      ><input
+                        type="radio"
+                        name="nomineeGender"
+                        value="Other"
+                        id="nomineeGenderOther"
+                      /><span data-translate-key="optGenderOther"
+                        >Other</span
+                      ></label
+                    >
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="remarks" data-translate-key="lblRemarks"
+                    >Remarks:</label
+                  >
+                  <textarea
+                    id="remarks"
+                    data-translate-key="phRemarks"
+                    placeholder="Enter any remarks or reasons for skipped fields..."
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="button"
+                id="addEntryButton"
+                class="action-button add-button"
+              >
+                <i class="fas fa-plus"></i>
+                <span data-translate-key="btnAddEntry">Add Entry</span>
+              </button>
+              <button
+                type="reset"
+                id="clearFormButton"
+                class="action-button clear-button"
+              >
+                <i class="fas fa-times"></i>
+                <span data-translate-key="btnClearForm">Clear Form</span>
+              </button>
+            </div>
+          </form>
+        <!-- end main-content-area -->
+
+        <!-- Image Upload & Viewer -->
+        <div class="image-handling-section">
+          <input
+            type="file"
+            id="imageUploadInput"
+            multiple
+            accept="image/*"
+            style="display: none"
+          />
+          <button
+            type="button"
+            id="uploadImageButton"
+            class="action-button info-button"
+          >
+            <i class="fas fa-upload"></i>
+            <span data-translate-key="btnUploadImage">Upload Images</span>
+          </button>
+          <button
+            type="button"
+            id="toggleImageViewerButton"
+            class="action-button secondary-button"
+            disabled
+          >
+            <i class="fas fa-eye"></i>
+            <span data-translate-key="btnToggleImageViewer">View Images</span>
+            (<span id="imageCount">0</span>)
+          </button>
+
+          <div
+            id="imageViewerSection"
+            class="image-viewer"
+            style="display: none"
+          >
+            <button
+              class="carousel-button prev"
+              id="prevImageButton"
+              data-translate-key="btnPrev"
+              title="Previous Image"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="image-display-area">
+              <img
+                id="currentImageView"
+                src=""
+                alt="Uploaded Image Preview"
+              />
+            </div>
+            <p id="imageViewerStatus" data-translate-key="ImageViewerStatus">
+              Image {current} of {total}
+            </p>
+            <button
+              class="carousel-button next"
+              id="nextImageButton"
+              data-translate-key="btnNext"
+              title="Next Image"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <!-- end image-handling-section -->
+
+      </div>
+      <!-- SECTION END: Main Container -->
+
+      <hr class="separator" />
+
+      <!-- SECTION START: Table Area -->
+      <div class="table-header">
+        <h2 data-translate-key="tblHeading">Table</h2>
+        <button
+          id="fullscreenButton"
+          class="control-button"
+          data-translate-key="btnFullscreen"
+          title="Toggle Table Fullscreen"
+        >
+          <i class="fas fa-expand"></i>
+          <span data-translate-key="btnFullscreen">Fullscreen</span>
+        </button>
+      </div>
+      <div id="tableContainer" class="table-container">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th
+                data-sort-key="branchName"
+                data-translate-key="tblColBranch"
+              >
+                Branch <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="region"
+                data-translate-key="tblColRegion"
+              >
+                Region <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="customerName"
+                data-translate-key="tblColName"
+              >
+                Customer Name <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="customerID"
+                data-translate-key="tblColCustID"
+              >
+                Cust ID <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="gender"
+                data-translate-key="tblColGender"
+              >
+                Gender <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="mobileNumber"
+                data-translate-key="tblColMobile"
+              >
+                Mobile <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="enrolmentDate"
+                data-translate-key="tblColEnrolDate"
+              >
+                Enrl. Date <span class="sort-icon"></span>
+              </th>
+              <th data-sort-key="dob" data-translate-key="tblColDOB">
+                DOB <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="savingsAccountNumber"
+                data-translate-key="tblColSavingsAcc"
+              >
+                Sav. Acc <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="csbCode"
+                data-translate-key="tblColCSB"
+              >
+                CSB Code <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="d2cRoCode"
+                data-translate-key="tblColD2CRoCode"
+              >
+                D2C/RO Code <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="partnerName"
+                data-translate-key="tblColPartnerName"
+              >
+                Partner <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="productName"
+                data-translate-key="tblColProductName"
+              >
+                Product <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="premium"
+                data-translate-key="tblColPremium"
+              >
+                Premium <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="tenure"
+                data-translate-key="tblColTenure"
+              >
+                Tenure <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="cseName"
+                data-translate-key="tblColCseName"
+              >
+                CSE Name <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="nomineeName"
+                data-translate-key="tblColNomName"
+              >
+                Nominee Name <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="nomineeRelationship"
+                data-translate-key="tblColNomRelation"
+              >
+                Nominee Rel. <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="nomineeDob"
+                data-translate-key="tblColNomDOB"
+              >
+                Nominee DOB <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="nomineeMobileNumber"
+                data-translate-key="tblColNomMobile"
+              >
+                Nominee Mobile <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="nomineeGender"
+                data-translate-key="tblColNomGender"
+              >
+                Nominee Gender <span class="sort-icon"></span>
+              </th>
+              <th
+                data-sort-key="remarks"
+                data-translate-key="tblColRemarks"
+              >
+                Remarks <span class="sort-icon"></span>
+              </th>
+              <th data-translate-key="tblColActions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody">
+            <tr class="no-data-row">
+              <td colspan="23" data-translate-key="tblNoEntries">
+                No entries added yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- SECTION END: Table Area -->
+
+      <!-- SECTION START: Download Buttons -->
+      <div class="download-actions">
+        <button
+          id="submitToFirebaseButton"
+          class="action-button add-button"
+        >
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Submit to Firebase</span>
+        </button>
+        <button
+          id="saveExcelButton"
+          class="action-button save-button"
+        >
+          <i class="fas fa-file-excel"></i>
+          <span data-translate-key="btnSaveExcel">Download Excel</span>
+        </button>
+        <button
+          id="saveCsvButton"
+          class="action-button info-button"
+        >
+          <i class="fas fa-file-csv"></i>
+          <span data-translate-key="btnSaveCsv">Download CSV</span>
+        </button>
+        <button
+          id="savePdfButton"
+          class="action-button danger-button"
+        >
+          <i class="fas fa-file-pdf"></i>
+          <span data-translate-key="btnSavePdf">Download PDF</span>
+        </button>
+        <button
+          id="clearTableButton"
+          class="action-button danger-button"
+        >
+          <i class="fas fa-trash-alt"></i>
+          <span data-translate-key="btnClearTable">Clear Table Data</span>
+        </button>
+      </div>
+      <!-- SECTION END: Download Buttons -->
+
+      <!-- SECTION START: Dashboard Modal -->
+      <div id="dashboardModal" class="modal">
+        <div class="modal-content">
+          <span
+            class="close-button"
+            id="closeDashboardButton"
+            data-translate-key="btnClose"
+            title="Close"
+            >×</span
+          >
+          <h2 data-translate-key="DashboardTitle">Dashboard</h2>
+          <div class="dashboard-stats">
+            <div class="stat-card">
+              <h3 data-translate-key="dashTotalEntries">Total Entries</h3>
+              <p id="statTotalEntries">0</p>
+            </div>
+            <div class="stat-card">
+              <h3 data-translate-key="dashLastWeek">Entries Last 7 Days</h3>
+              <p id="statLastWeek">0</p>
+            </div>
+            <div class="stat-card">
+              <h3 data-translate-key="dashDuplicates">Duplicate Rows</h3>
+              <p id="statDuplicates">0</p>
+            </div>
+            <div class="stat-card">
+              <h3 data-translate-key="dashMissing">Missing Required</h3>
+              <p id="statMissing">0</p>
+            </div>
+          </div>
+          <div class="chart-carousel">
+            <button
+              class="carousel-button prev"
+              id="prevChartButton"
+              data-translate-key="btnPrev"
+              title="Previous Chart"
+              aria-label="Previous Chart"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="chart-area">
+              <canvas id="dashboardChart"></canvas>
+            </div>
+            <button
+              class="carousel-button next"
+              id="nextChartButton"
+              data-translate-key="btnNext"
+              title="Next Chart"
+              aria-label="Next Chart"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- SECTION END: Dashboard Modal -->
+
+      <!-- SECTION START: Admin Login Modal -->
+      <div id="adminLoginModal" class="modal">
+        <div class="modal-content modal-small">
+          <span
+            class="close-button"
+            id="closeAdminLoginButton"
+            data-translate-key="btnClose"
+            title="Close"
+            >×</span
+          >
+          <h2 data-translate-key="lblAdminLoginTitle">Admin Login</h2>
+          <form id="adminLoginForm">
+            <div class="form-field">
+              <label for="adminUsername" data-translate-key="lblUsername"
+                >Username:</label
+              ><input
+                type="text"
+                id="adminUsername"
+                placeholder="Enter Username"
+                required
+              />
+            </div>
+            <div class="form-field">
+              <label for="adminPassword" data-translate-key="lblPassword"
+                >Password:</label
+              ><input
+                type="password"
+                id="adminPassword"
+                placeholder="Enter Password"
+                required
+              />
+            </div>
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="action-button add-button"
+                data-translate-key="btnAdminLogin"
+              >
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- SECTION END: Admin Login Modal -->
+
+      <!-- SECTION START: Admin Edit Panel Modal -->
+      <div id="adminEditModal" class="modal">
+        <div class="modal-content modal-large">
+          <span
+            class="close-button"
+            id="closeAdminEditButton"
+            data-translate-key="btnClose"
+            title="Close"
+            >×</span
+          >
+          <h2 data-translate-key="lblAdminEditTitle">
+            Edit Partner & Product Details
+          </h2>
+          <form id="adminEditForm">
+            <div id="adminEditGrid" class="admin-edit-grid">
+              <p>Loading partner details...</p>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="action-button add-button">
+                <i class="fas fa-save"></i>
+                <span data-translate-key="btnAdminSaveChanges">Save Changes</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- SECTION END: Admin Edit Panel Modal -->
+
+    </div>
+    <!-- SECTION END: Main Container -->
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <!-- SCRIPT LOADING ORDER IS CRITICAL FOR FIREBASE -->
+    <script src="firebase.js" type="module"></script>
+    <script src="script.js" type="module"></script>
+  </body>
+</html>
